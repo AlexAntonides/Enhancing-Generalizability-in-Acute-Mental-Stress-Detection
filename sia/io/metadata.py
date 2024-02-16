@@ -16,7 +16,16 @@ class Metadata:
 
     def retrieve(self, path: str):
         # This is kind of hardcoded now. :(
-        df = pd.read_csv('./data/ecg_raw/TimeStamps_Merged.txt', sep='\t', decimal=',', skiprows=[0], header=None, names=['subject_id', 'category', 'code', 'start', 'end'], dtype={'subject_id': 'str', 'category': 'str', 'code': 'str', 'start': 'str', 'end': 'str'}, parse_dates=['start', 'end'])
+        df = pd.read_csv(
+            self.path, 
+            sep='\t', 
+            decimal=',', 
+            skiprows=[0], 
+            header=None, 
+            names=['subject_id', 'category', 'code', 'start', 'end'], 
+            dtype={'subject_id': 'str', 'category': 'str', 'code': 'str', 'start': 'str', 'end': 'str'}, 
+            parse_dates=['start', 'end']
+        )
 
         if self.regex is not None:
             match = re.findall(self.regex, path)

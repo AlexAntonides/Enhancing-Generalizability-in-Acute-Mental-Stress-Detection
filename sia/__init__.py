@@ -9,7 +9,6 @@ __version__ = "0.0.1"
 
 # Maintainer info
 __author__ = "Alex Antonides"
-__email__ = "alex.antonides@student.vu.nl"
 
 # Subpackages
 from .builders import *

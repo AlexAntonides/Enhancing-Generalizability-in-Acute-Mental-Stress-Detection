@@ -1,14 +1,9 @@
 """Utility submodule for Stress-in-Action."""
 
-import glob
-
 import contextlib
 import joblib
 
 # Utilities
-def get_file_paths(case: str):
-    return glob.glob(fr"{case}")
-
 @contextlib.contextmanager
 def tqdm_joblib(tqdm_object):
     """Context manager to patch joblib to report into tqdm progress bar given as argument"""
