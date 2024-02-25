@@ -16,4 +16,4 @@ PyWavelets==1.5.0
 py-ecg-detectors==1.3.5
 biosppy==2.1.2
 waipy==0.1.51
-git+https://github.com/EricCreusen/scaleogram
+scaleogram @ git+https://github.com/EricCreusen/scaleogram
