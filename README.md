@@ -1,6 +1,7 @@
 <a name="readme-top"></a>
 <!-- PROJECT SHIELDS -->
 [![Python Version][python-shield]][python-url]
+[![PyTorch Version][pytorch-shield]][pytorch-url]
 
 
 <!-- PROJECT LOGO -->
@@ -10,10 +11,10 @@
     <svg stroke="white" fill="white" stroke-width="0" height="5em" width="5em" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 135.96 117.81"><path d="M15.42,117.73,0,117.76,28.05,68.91s31,.15,31-.19S43.74,42.29,43.74,41.79,68.22,0,68.22,0l34.54,59.66-13.83-.08L68.26,24.24,57.8,40.87,72.88,68.74l35,.09,28.12,49H123.23l-7.76-12.18-14.71-25L35,80.74,21.25,106Z"></path></svg>
   </a>
 
-  <h3 align="center">Master's Thesis</h3>
+  <h3 align="center">Stress-in-Action</h3>
 
   <p align="center">
-    Repository for the code I've written for my Master's Thesis.
+    This repository houses the codebase of my  master's thesis to predict stress soley on the electrical acitivity of the heart. 
     <br />
     <a href="https://github.com/AlexAntonides/stress-in-action/tree/master/sia/docs/structure.md"><strong>Explore the docs »</strong></a>
     <br />
@@ -47,7 +48,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-This is still a work-in-progress. This is the code I've written so far for my Master's Thesis.
+The Stress-in-Action (SiA) projects aims to predict the stress of an unknown person soley on the electrical activity of the heart. This is achieved through training a neural network on electrocardiogram (ECG) recordings.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -105,3 +106,5 @@ Or alternatively, use the `--test` flag to train on one file for testing purpose
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 [python-shield]: https://img.shields.io/badge/3.10%2B-yellow?style=for-the-badge&logo=python&logoColor=white&label=python&labelColor=blue
 [python-url]: https://www.python.org/
+[pytorch-shield]: https://img.shields.io/badge/2.1%2B-orange?style=for-the-badge&logo=pytorch&logoColor=orange&label=PyTorch&labelColor=white
+[pytorch-url]: https://pytorch.org/
