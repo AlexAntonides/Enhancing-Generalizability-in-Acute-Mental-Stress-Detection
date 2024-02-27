@@ -2,4 +2,3 @@
 
 # Aliases
 from .pipeline import *
-from .processor import *

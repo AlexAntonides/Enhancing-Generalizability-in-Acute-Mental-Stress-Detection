@@ -11,29 +11,29 @@ from glob import glob
 from joblib import Parallel, delayed
 from ..utils import tqdm_joblib
 
-from typing import Self, Iterator, Union, Callable
+from typing import Iterator, Union, Callable
 
 class Pipeline:
     def __init__(self):
         self.settings = {}
 
-    def data(self, reader: Callable[[str], Iterator[np.ndarray]]) -> Self:
+    def data(self, reader: Callable[[str], Iterator[np.ndarray]]):
         self.settings['reader'] = reader
         return self
     
-    def preprocess(self, preprocessor: Callable[[np.ndarray], pd.DataFrame]) -> Self:
+    def preprocess(self, preprocessor: Callable[[np.ndarray], pd.DataFrame]):
         if 'preprocess' not in self.settings:
             self.settings['preprocess'] = []
         self.settings['preprocess'].append(preprocessor)
         return self
     
-    def postprocess(self, postprocessor: Callable[[np.ndarray], pd.DataFrame]) -> Self:
+    def postprocess(self, postprocessor: Callable[[np.ndarray], pd.DataFrame]):
         if 'postprocess' not in self.settings:
             self.settings['postprocess'] = []
         self.settings['postprocess'].append(postprocessor)
         return self
     
-    def reduce(self, reducer: Callable[[np.ndarray], pd.DataFrame]) -> Self:
+    def reduce(self, reducer: Callable[[np.ndarray], pd.DataFrame]):
         if 'reduce' not in self.settings:
             self.settings['reduce'] = []
         self.settings['reduce'].append(reducer)

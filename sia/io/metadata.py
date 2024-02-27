@@ -2,7 +2,7 @@ import re
 
 import pandas as pd
 
-from typing import Self, Pattern
+from typing import Pattern
 
 class Metadata:
     """Reads metadata from a file."""
@@ -10,7 +10,7 @@ class Metadata:
         self.path = path
         self.regex = None
 
-    def on_regex(self, regex: Pattern[str]) -> Self:
+    def on_regex(self, regex: Pattern[str]):
         self.regex = regex
         return self
 
@@ -24,7 +24,6 @@ class Metadata:
             header=None, 
             names=['subject_id', 'category', 'code', 'start', 'end'], 
             dtype={'subject_id': 'str', 'category': 'str', 'code': 'str', 'start': 'str', 'end': 'str'}, 
-            parse_dates=['start', 'end']
         )
 
         if self.regex is not None:

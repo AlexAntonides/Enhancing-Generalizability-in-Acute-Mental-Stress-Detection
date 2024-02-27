@@ -104,7 +104,7 @@ Or alternatively, use the `--test` flag to train on one file for testing purpose
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[python-shield]: https://img.shields.io/badge/3.10%2B-yellow?style=for-the-badge&logo=python&logoColor=white&label=python&labelColor=blue
+[python-shield]: https://img.shields.io/badge/3.9%2B-yellow?style=for-the-badge&logo=python&logoColor=white&label=python&labelColor=blue
 [python-url]: https://www.python.org/
 [pytorch-shield]: https://img.shields.io/badge/2.1%2B-orange?style=for-the-badge&logo=pytorch&logoColor=orange&label=PyTorch&labelColor=white
 [pytorch-url]: https://pytorch.org/
