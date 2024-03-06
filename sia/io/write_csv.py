@@ -1,12 +1,13 @@
 import re
 from pathlib import Path
 
-import pandas as pd
-import numpy as np
+from datasets import Dataset, IterableDataset
 
-def write_csv(path: str):
+from typing import Callable, Union
+
+def write_csv(path: str) -> Callable[[str, Union[Dataset, IterableDataset]], None]:
     """Save data to a CSV file."""
-    def inner(filename: str, data: np.ndarray) -> None:
+    def inner(filename: str, ds: Union[Dataset, IterableDataset]) -> None:
         location = Path(path)
 
         stem = location.stem
@@ -20,6 +21,5 @@ def write_csv(path: str):
                 filename = match[0]
 
         location.parent.mkdir(parents=True, exist_ok=True)
-        # np.savetxt(location.with_stem(filename), data, delimiter=',')
-        pd.DataFrame(data).to_csv(location.with_stem(filename), index=False, header=False)
+        ds.to_csv(location.with_stem(filename))
     return inner

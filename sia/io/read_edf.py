@@ -5,13 +5,15 @@ import numpy as np
 
 import mne
 
+from datasets import Dataset, IterableDataset
+
 from typing import Union, Callable, Iterator
 
 from .metadata import Metadata
 
-def read_edf(path: str, metadata: Union[pd.DataFrame, Metadata, Callable[[mne.io.Raw], pd.DataFrame]] = None) -> Callable[[Union[pd.DataFrame, Metadata, Callable[[mne.io.Raw], pd.DataFrame]]], Iterator[Union[str, np.ndarray]]]:
+def read_edf(path: str, metadata: Union[pd.DataFrame, Metadata, Callable[[mne.io.Raw], pd.DataFrame]] = None) -> Callable[[Union[pd.DataFrame, Metadata, Callable[[mne.io.Raw], pd.DataFrame]]], Iterator[Union[Dataset, IterableDataset]]]:
     """Read an EDF file."""
-    def inner() -> Iterator[Union[str, np.ndarray]]:
+    def inner() -> Iterator[Union[Dataset, IterableDataset]]:
         files = glob(path)
         if len(files) == 0:
             raise FileNotFoundError(f'No files found at {path}')
@@ -36,7 +38,7 @@ def read_edf(path: str, metadata: Union[pd.DataFrame, Metadata, Callable[[mne.io
             elif callable(metadata):
                 df = attach_edf_metadata(df, metadata(raw))
 
-            yield files[0], df.to_numpy()
+            yield path, Dataset.from_pandas(df)
     return inner
 
 def attach_edf_metadata(df: pd.DataFrame, metadata: Metadata) -> pd.DataFrame: 

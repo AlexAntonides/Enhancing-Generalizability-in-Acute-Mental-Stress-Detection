@@ -1,20 +1,28 @@
 from glob import glob 
 
-import pandas as pd 
-import numpy as np
+import datasets
+from datasets import load_dataset, Dataset, IterableDataset
 
 from typing import Union, Tuple, Callable, Iterator
 
-def read_csv(path: str) -> Callable[[Union[None, Tuple[str]]], Iterator[Union[str, np.ndarray]]]:
+def read_csv(path: str, columns: Union[None, Tuple[str]] = None) -> Callable[[Union[None, Tuple[str]]], Iterator[Union[Dataset, IterableDataset]]]:
     """Read a CSV file."""
-    def inner(header: Union[None, Tuple[str]] = None) -> Iterator[Union[str, np.ndarray]]:
+    def inner() -> Iterator[Union[Dataset, IterableDataset]]:
         files = glob(path)
         if len(files) == 0:
             raise FileNotFoundError(f'No files found at {path}')
         elif len(files) != 1:
             for file in files:
-                yield from read_csv(file)()
+                yield from read_csv(file, columns)()
         else:
-            df = pd.read_csv(files[0], header=header, low_memory=False)
-            yield files[0], df.to_numpy()
+            ds = load_dataset(
+                "csv", 
+                data_files=path,
+                usecols=columns, 
+                features=datasets.Features({
+                    columns[0]: datasets.Value('float64'), 
+                    columns[1]: datasets.Value('string')
+                }) if columns is not None else None
+            )
+            yield path, ds['train']
     return inner

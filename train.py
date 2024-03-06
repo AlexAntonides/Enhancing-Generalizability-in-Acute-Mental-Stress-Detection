@@ -25,22 +25,27 @@ def prepare_model(
     batch_size: int, 
     learning_rate: float, 
     num_workers: int,
-    train_participants: list,
-    val_participants: list,
-    test_participants: list
+    train_participants: list[str],
+    val_participants: list[str],
+    test_participants: list[str]
 ) -> LightningModule:
     class Model(model):
-        def __init__(self, batch_size: int, learning_rate: float, num_workers: int):
+        def __init__(
+            self, 
+            batch_size: int, 
+            learning_rate: float, 
+            num_workers: int
+        ):
             super().__init__()
 
             self.save_hyperparameters()
 
         def prepare_data(self):
-            self.data = load_dataset('csv', data_files={
-                'fit': train_participants,
-                'validate': val_participants,
-                'test': test_participants
-            }, column_names=['signal', 'label'], num_proc=8)
+            self.data = dataset.load_dataset(
+                train_participants=train_participants,
+                val_participants=val_participants,
+                test_participants=test_participants
+            )
             self.data = self.data.with_format('torch', device=self.device)
 
         def setup(self, stage):
@@ -139,7 +144,7 @@ if __name__ == "__main__":
     parser.add_argument('model', type=str, help='the model')
     parser.add_argument('data', type=str, help='the data directory')
 
-    parser.add_argument('--dataset', '-d', type=str, help='the dataset', default='sia.datasets.windowed_dataset')
+    parser.add_argument('--dataset', '-d', type=str, help='the dataset')
 
     parser.add_argument('--test_size', '-ts', type=float, help='the test split size', default=0.2)
     parser.add_argument('--val_size', '-vs', type=float, help='the validation split size', default=0.25)
