@@ -68,8 +68,8 @@ This dataset can be made using the `Pipeline` as seen in `pipeline.ipynb`, or wi
 ```py
 sia.Pipeline() \
     .data(read_csv('./data/preprocessed_data/*.csv')) \
-    .reduce(reduce) \
-    .postprocess(encode_category) \
+    .rename({'category': 'label'}) \
+    .process(encode_category) \
     .to(write_csv('./data/model/[0-9]{5}.csv'))
 ```
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -87,7 +87,17 @@ pip[3] install -r requirements.txt
 2. **Train**. \
 You can train by using the `train.py` script, by executing the following command,
 ```bash
-python[3] train.py sia.models.[model_name] ./data/model/*.csv
+python[3] train.py sia.models.[model_name] ./data/model/[0-9]+.csv
+```
+Or alternatively, use the `--test` flag to train on one file for testing purposes.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+2. **Develop**. \
+You can test by using the `train.py` script, by executing the following command,
+```bash
+python[3] train.py sia.models.[model_name] ./data/model/**/ --ignore_wandb --test
 ```
 Or alternatively, use the `--test` flag to train on one file for testing purposes.
 

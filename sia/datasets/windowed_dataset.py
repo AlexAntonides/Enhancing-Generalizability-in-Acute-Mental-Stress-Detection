@@ -4,7 +4,7 @@ from datasets import Dataset, load_dataset
 from typing import Tuple
 
 class Dataset(torch.utils.data.Dataset):
-    def __init__(self, data: Dataset, window: int):
+    def __init__(self, data: Dataset, window: int, *args, **kwargs):
         self.data = data
         self.window = window
 

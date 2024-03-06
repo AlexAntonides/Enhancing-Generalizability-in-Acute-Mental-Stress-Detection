@@ -20,36 +20,45 @@ import wandb
 
 def prepare_model(
     model: LightningModule, 
-    dataset: torch.utils.data.Dataset, 
+    data: str,
     window: int,
     batch_size: int, 
     learning_rate: float, 
     num_workers: int,
     train_participants: list[str],
     val_participants: list[str],
-    test_participants: list[str]
+    test_participants: list[str],
+    dataset: torch.utils.data.Dataset = None
 ) -> LightningModule:
     class Model(model):
-        def __init__(
-            self, 
-            batch_size: int, 
-            learning_rate: float, 
-            num_workers: int
-        ):
+        def __init__(self, batch_size: int, learning_rate: float, num_workers: int):
+            self.save_hyperparameters()
             super().__init__()
 
-            self.save_hyperparameters()
-
         def prepare_data(self):
-            self.data = dataset.load_dataset(
-                train_participants=train_participants,
-                val_participants=val_participants,
-                test_participants=test_participants
-            )
+            try:
+                self.data = load_dataset(
+                    data,
+                    trust_remote_code=True,
+                    train_participants=train_participants, 
+                    val_participants=val_participants, 
+                    test_participants=test_participants,
+                    num_proc=8 if len(train_participants) > 8 else len(train_participants)
+                )
+            except: 
+                # Old code, gotta remove later.
+                self.data = load_dataset('csv', data_files={
+                    'fit': train_participants,
+                    'validate': val_participants,
+                    'test': test_participants
+                }, column_names=['signal', 'label'], num_proc=8)
             self.data = self.data.with_format('torch', device=self.device)
 
         def setup(self, stage):
-            self.dataset = dataset(self.data[stage], window)
+            if dataset is not None:
+                self.dataset = dataset(self.data[stage], window)
+            else:
+                self.dataset = self.data[stage]
             self.accuracy = torchmetrics.classification.BinaryAccuracy()
             self.f1score = torchmetrics.classification.BinaryF1Score()
 
@@ -144,24 +153,24 @@ if __name__ == "__main__":
     parser.add_argument('model', type=str, help='the model')
     parser.add_argument('data', type=str, help='the data directory')
 
-    parser.add_argument('--dataset', '-d', type=str, help='the dataset')
+    parser.add_argument('--dataset', '-d', type=str, help='the dataset', default='sia.datasets.dataset')
 
     parser.add_argument('--test_size', '-ts', type=float, help='the test split size', default=0.2)
     parser.add_argument('--val_size', '-vs', type=float, help='the validation split size', default=0.25)
 
     parser.add_argument('--project', '-p', type=str, help='the project name', default='stress-in-action')
-    parser.add_argument('--wandb', '-wdb', type=bool, help='whether Weights & Biases should track the progress', default=True)
+    parser.add_argument('--ignore_wandb', '-iw', help='Ignore wandb', action='store_true')
     
     parser.add_argument('--epochs', '-e', type=int, help='the amount of epochs to train', default=11) 
     parser.add_argument('--batch_size', '-b', type=int, help='the batch size to use', default=1024) # default from tuner.scale_batch_size(model)
-    parser.add_argument('--learning_rate', '-l', type=float, help='the learning rate to use', default=0.8317637711026709) # default from tuner.lr_find(model)
+    parser.add_argument('--learning_rate', '-l', type=float, help='the learning rate to use', default=0.01) 
     parser.add_argument('--window', '-w', type=int, help='The amount of samples per window, where 1000hz = 1 second', default=1000)
     parser.add_argument('--n_workers', '-nw', type=int, help='The amount of workers', default=8)
 
     parser.add_argument('--test', '-t', help='Train with one file to speed up training for testing purposes', action='store_true')
 
     args = parser.parse_args()
-    
+
     participants = glob(args.data)
     train_participants, test_participants = train_test_split(participants, test_size=args.test_size)
     train_participants, val_participants = train_test_split(train_participants, test_size=args.val_size)
@@ -170,11 +179,13 @@ if __name__ == "__main__":
     model_module = importlib.import_module(args.model)
 
     dataset_name = args.data.split('/')[-2]
-    dataset_module = importlib.import_module(args.dataset)
+    if args.dataset:
+        dataset_module = importlib.import_module(args.dataset)
 
     model = prepare_model(
         model=model_module.Model, # assuming all models are named Model.
-        dataset=dataset_module.Dataset,
+        data=args.data.split('/*')[0],
+        dataset=dataset_module.Dataset if args.dataset else None,
         window=args.window,
         batch_size=args.batch_size,
         learning_rate=args.learning_rate,
@@ -184,7 +195,7 @@ if __name__ == "__main__":
         test_participants=test_participants if not args.test else test_participants[:1]
     )
 
-    if args.wandb:
+    if args.ignore_wandb == False:
         wandb.init(
             project=args.project,
             config={
@@ -203,5 +214,5 @@ if __name__ == "__main__":
         epochs=args.epochs
     )
     
-    if args.wandb:
+    if args.ignore_wandb == False:
         wandb.finish()

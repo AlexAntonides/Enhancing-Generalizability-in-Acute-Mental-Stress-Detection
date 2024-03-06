@@ -41,6 +41,15 @@ class Pipeline:
         self.settings.append({'select': setting})
         return self
     
+    def drop(self, columns: Union[str, list[str]]) -> Self:
+        setting = []
+        if isinstance(columns, str):
+            setting.append(columns)
+        else: 
+            setting.extend(columns)
+        self.settings.append({'drop': setting})
+        return self
+    
     def rename(self, x: Union[str, dict, list[str, dict]], y: str = None) -> Self:
         setting = []
         def _rename(x: Union[str, dict, list[str, dict]], y: str = None):
@@ -114,6 +123,8 @@ class Pipeline:
                     )
                 elif key == 'select':
                     dataset = dataset.select_columns(value)
+                elif key == 'drop':
+                    dataset = dataset.remove_columns(value)
                 elif key == 'rename':
                     for column in value:
                         dataset = dataset.rename_columns(column)
