@@ -31,6 +31,7 @@ def read_edf(path: str, metadata: Union[pd.DataFrame, Metadata, Callable[[mne.io
             timestamps = timestamps.astype('timedelta64[ms]') + np.datetime64(raw.annotations.orig_time.replace(tzinfo=None), 'ms')
 
             df = pd.DataFrame({'timestamp': timestamps, 'signal': signals})
+
             if isinstance(metadata, pd.DataFrame):
                 df = attach_edf_metadata(df, metadata)
             elif isinstance(metadata, Metadata):
@@ -45,7 +46,7 @@ def attach_edf_metadata(df: pd.DataFrame, metadata: Metadata) -> pd.DataFrame:
     """Attach metadata to an EDF file."""
     if not 'datetime64[ms]' in str(metadata.start.dtype) or not 'datetime64[ms]' in str(metadata.end.dtype):
         with pd.option_context('mode.chained_assignment', None):
-            metadata.start= metadata.start.astype('datetime64[ms]')
+            metadata.start = metadata.start.astype('datetime64[ms]')
             metadata.end = metadata.end.astype('datetime64[ms]')
 
     df = pd.merge_asof(df.sort_values('timestamp'), pd.DataFrame(metadata, columns=['category', 'start', 'end']), left_on='timestamp', right_on='start', direction='backward')
