@@ -86,15 +86,22 @@ pip[3] install -r requirements.txt
 
 2. **Train**. \
 You can train by using the `train.py` script, by executing the following command,
+
+2a. **Windowed Raw Signal**. 
 ```bash
-python[3] train.py sia.models.[model_name] ./data/model/[0-9]+.csv
+python[3] train.py sia.models.[model_name] ./data/model/[0-9]+.csv --dataset=sia.datasets.windowed_dataset
 ```
+
+2b. **Scaleograms**. 
+```bash
+python[3] train.py sia.models.[model_name] ./data/model/**/ --dataset=sia.datasets.image_dataset
+```
+
 Or alternatively, use the `--test` flag to train on one file for testing purposes.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-
-2. **Develop**. \
+3. **Develop**. \
 You can test by using the `train.py` script, by executing the following command,
 ```bash
 python[3] train.py sia.models.[model_name] ./data/model/**/ --ignore_wandb --test

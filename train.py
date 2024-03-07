@@ -52,7 +52,6 @@ def prepare_model(
                     'validate': val_participants,
                     'test': test_participants
                 }, column_names=['signal', 'label'], num_proc=8)
-            self.data = self.data.with_format('torch', device=self.device)
 
         def setup(self, stage):
             if dataset is not None:

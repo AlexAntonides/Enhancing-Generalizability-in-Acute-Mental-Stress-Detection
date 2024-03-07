@@ -7,16 +7,16 @@ class Model(LightningModule):
     """
     def __init__(self):
         super().__init__()
-        
+
         self.layers = nn.Sequential(
-            nn.Conv2d(in_channels=self.hparams.batch_size, out_channels=32, kernel_size=5, stride=1, padding=2),
+            nn.Conv2d(in_channels=3, out_channels=32, kernel_size=5, stride=1, padding=2),
             nn.ReLU(),
             nn.MaxPool2d(2, 2),
             nn.Conv2d(in_channels=32, out_channels=64, kernel_size=5, padding=2),
             nn.ReLU(),
             nn.MaxPool2d(2, 2),
             nn.Flatten(),
-            nn.Linear(in_features=64 * 28 * 28, out_features=1000),
+            nn.Linear(in_features=64 * 31 * 31, out_features=1000), # 31 = width/height, halved twice by 2 maxpool layers.
             nn.ReLU(),
             nn.Linear(in_features=1000, out_features=1),
             nn.Softmax(dim=1)
