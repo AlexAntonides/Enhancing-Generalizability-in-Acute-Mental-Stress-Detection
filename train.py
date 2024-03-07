@@ -186,13 +186,21 @@ if __name__ == "__main__":
     model_name = args.model.split('.')[-1]
     model_module = importlib.import_module(args.model)
 
-    dataset_name = args.data.split('/')[-2]
+    if isinstance(args.data, str):
+        dataset_name = args.data.split('/')[-2]
+        dataset_path = '/'.join(args.data.split('/')[:-1])
+    elif isinstance(args.data, list):
+        dataset_name = args.data[0].split('/')[-2]
+        dataset_path = '/'.join(args.data[0].split('/')[:-1])
+    else: 
+        dataset_name = 'unknown'
+    
     if args.dataset:
         dataset_module = importlib.import_module(args.dataset)
 
     model = prepare_model(
         model=model_module.Model, # assuming all models are named Model.
-        data=args.data.split('/*')[0],
+        data=dataset_path,
         dataset=dataset_module.Dataset if args.dataset else None,
         window=args.window,
         batch_size=args.batch_size,
