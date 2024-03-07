@@ -150,7 +150,7 @@ if __name__ == "__main__":
     )
 
     parser.add_argument('model', type=str, help='the model')
-    parser.add_argument('data', type=str, help='the data directory')
+    parser.add_argument('data', type=str, help='the data directory', nargs='+')
 
     parser.add_argument('--dataset', '-d', type=str, help='the dataset', default='sia.datasets.dataset')
 
@@ -170,7 +170,16 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    participants = glob(args.data)
+    if isinstance(args.data, list):
+        participants = args.data
+    else:
+        participants = glob(args.data)
+
+    if len(participants) == 0:
+        raise FileNotFoundError(f"No participants found on {args.data}:", participants)
+    elif len(participants) <= 3:
+        raise FileNotFoundError(f"Too few participants found on {args.data}:", participants)
+
     train_participants, test_participants = train_test_split(participants, test_size=args.test_size)
     train_participants, val_participants = train_test_split(train_participants, test_size=args.val_size)
 

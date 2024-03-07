@@ -18,21 +18,21 @@ from ..utils import tqdm_joblib
 import datasets
 from datasets import Dataset, IterableDataset
 
-from typing import Self, Iterator, Union, Callable
+from typing import Iterator, Union, Callable
 
 class Pipeline:
     def __init__(self):
         self.settings = []
 
-    def data(self, reader: Callable[[str], Iterator[np.ndarray]]) -> Self:
+    def data(self, reader: Callable[[str], Iterator[np.ndarray]]):
         self.settings.append({'reader': reader})
         return self
     
-    def process(self, processor: Callable[[Union[Dataset, IterableDataset]], Union[Dataset, IterableDataset]]) -> Self:
+    def process(self, processor: Callable[[Union[Dataset, IterableDataset]], Union[Dataset, IterableDataset]]):
         self.settings.append({'process': processor})
         return self
     
-    def select(self, columns: Union[str, list[str]]) -> Self:
+    def select(self, columns: Union[str, list[str]]):
         setting = []
         if isinstance(columns, str):
             setting.append(columns)
@@ -41,7 +41,7 @@ class Pipeline:
         self.settings.append({'select': setting})
         return self
     
-    def drop(self, columns: Union[str, list[str]]) -> Self:
+    def drop(self, columns: Union[str, list[str]]):
         setting = []
         if isinstance(columns, str):
             setting.append(columns)
@@ -50,7 +50,7 @@ class Pipeline:
         self.settings.append({'drop': setting})
         return self
     
-    def rename(self, x: Union[str, dict, list[str, dict]], y: str = None) -> Self:
+    def rename(self, x: Union[str, dict, list[str, dict]], y: str = None):
         setting = []
         def _rename(x: Union[str, dict, list[str, dict]], y: str = None):
             if isinstance(x, str):

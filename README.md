@@ -89,7 +89,7 @@ You can train by using the `train.py` script, by executing the following command
 
 2a. **Windowed Raw Signal**. 
 ```bash
-python[3] train.py sia.models.[model_name] ./data/model/[0-9]+.csv --dataset=sia.datasets.windowed_dataset
+python[3] train.py sia.models.[model_name] ./data/model/*.csv --dataset=sia.datasets.windowed_dataset
 ```
 
 2b. **Scaleograms**. 
@@ -109,7 +109,6 @@ python[3] train.py sia.models.[model_name] ./data/model/**/ --ignore_wandb --tes
 Or alternatively, use the `--test` flag to train on one file for testing purposes.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 <!-- FREQUENTLY ASKED QUESTIONS -->
 ## Frequently Asked Questions
