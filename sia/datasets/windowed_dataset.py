@@ -16,7 +16,6 @@ class Dataset(torch.utils.data.Dataset):
             raise StopIteration
         
         window = self.data[idx: idx + self.window]
-        print("=> here", self.data[idx])
 
         x = window['signal']
         y = torch.tensor(1, dtype=torch.float32) if torch.mode(window['label'], 0)[0] == 1 else torch.tensor(0, dtype=torch.float32)

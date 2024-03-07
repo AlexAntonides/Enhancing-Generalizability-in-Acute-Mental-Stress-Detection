@@ -45,7 +45,8 @@ def prepare_model(
                     test_participants=test_participants,
                     num_proc=8 if len(train_participants) > 8 else len(train_participants)
                 )
-            except: 
+            except Exception as e: 
+                warnings.warn("Old code detected, please update your dataset to the new format.", e)
                 # Old code, gotta remove later.
                 self.data = load_dataset('csv', data_files={
                     'fit': train_participants,
@@ -174,6 +175,8 @@ if __name__ == "__main__":
         participants = args.data
     else:
         participants = glob(args.data)
+
+    participants = [p.split('/')[-1].split('.')[0] for p in participants]
 
     if len(participants) == 0:
         raise FileNotFoundError(f"No participants found on {args.data}:", participants)
