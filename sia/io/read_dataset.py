@@ -1,4 +1,5 @@
 from glob import glob 
+from pathlib import Path
 
 import datasets
 from datasets import load_dataset, Dataset, IterableDataset
@@ -16,7 +17,7 @@ def read_dataset(path: str) -> Callable[[Union[None, Tuple[str]]], Iterator[Unio
                 yield from read_dataset(file)()
         else:
             ds = load_dataset(
-                path.split('\\')[0],
+                Path(path).parent,
                 files=path,
                 trust_remote_code=True,
                 num_proc=8 if len(files) > 8 else len(files)

@@ -2,6 +2,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 import importlib
+from pathlib import Path
 from argparse import ArgumentParser
 from glob import glob 
 
@@ -171,12 +172,23 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    if isinstance(args.data, list):
+    assert isinstance(args.data, list)
+    assert len(args.data) > 0
+
+    if len(args.data) == 1:
+        if Path(args.data[0]).exists():
+            # Assume path is literal path
+            participants = args.data
+        else:
+            # Assume path is a wildcard path
+            participants = glob(args.data[0])
+    elif len(args.data) > 1:
+        # Assume path is a list of paths
         participants = args.data
     else:
-        participants = glob(args.data)
+        raise FileNotFoundError(f"No participants found on {args.data}")
 
-    participants = [p.split('/')[-1].split('.')[0] for p in participants]
+    participants = [Path(p).stem for p in participants]
 
     if len(participants) == 0:
         raise FileNotFoundError(f"No participants found on {args.data}:", participants)
