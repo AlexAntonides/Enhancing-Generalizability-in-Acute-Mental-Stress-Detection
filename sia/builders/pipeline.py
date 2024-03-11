@@ -115,11 +115,21 @@ class Pipeline:
         else:
             for key, value in setting.items():
                 if key == 'process':
+                    args = _get_args(value)
+                    features = dataset.features.keys()
+                    intersection = list(set(features) & set(args))
+
+                    kwargs = {}
+                    if 'dataset' in args:
+                        kwargs['dataset'] = dataset
+
                     dataset = dataset.map(
                         value,
                         batched=True,
                         batch_size=int(len(dataset) * .25),
-                        input_columns=_get_args(value)
+                        input_columns=intersection,
+                        with_indices='idxs' in args,
+                        fn_kwargs=kwargs
                     )
                 elif key == 'select':
                     dataset = dataset.select_columns(value)

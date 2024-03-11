@@ -11,4 +11,8 @@ class Dataset(torch.utils.data.Dataset):
         return len(self.data)
 
     def __getitem__(self, idx) -> Tuple[torch.Tensor, torch.Tensor]:
-        return self.data[idx]
+        
+        x = self.data[idx]['signal']
+        y = self.data[idx]['label']
+
+        return x, y

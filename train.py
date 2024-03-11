@@ -19,6 +19,8 @@ from sklearn.model_selection import train_test_split
 
 import wandb
 
+torch.set_float32_matmul_precision('medium')
+
 def prepare_model(
     model: LightningModule, 
     data: str,
@@ -26,6 +28,7 @@ def prepare_model(
     batch_size: int, 
     learning_rate: float, 
     num_workers: int,
+    ignore_torch_format: bool,
     train_participants: list[str],
     val_participants: list[str],
     test_participants: list[str],
@@ -37,23 +40,17 @@ def prepare_model(
             super().__init__()
 
         def prepare_data(self):
-            try:
-                self.data = load_dataset(
-                    data,
-                    trust_remote_code=True,
-                    train_participants=train_participants, 
-                    val_participants=val_participants, 
-                    test_participants=test_participants,
-                    num_proc=8 if len(train_participants) > 8 else len(train_participants)
-                )
-            except Exception as e: 
-                warnings.warn("Old code detected, please update your dataset to the new format.", e)
-                # Old code, gotta remove later.
-                self.data = load_dataset('csv', data_files={
-                    'fit': train_participants,
-                    'validate': val_participants,
-                    'test': test_participants
-                }, column_names=['signal', 'label'], num_proc=8)
+            self.data = load_dataset(
+                data,
+                trust_remote_code=True,
+                train_participants=train_participants, 
+                val_participants=val_participants, 
+                test_participants=test_participants,
+                num_proc=num_workers if len(train_participants) > num_workers else len(train_participants)
+            )
+
+            if ignore_torch_format == False:
+                self.data = self.data.with_format("torch")
 
         def setup(self, stage):
             if dataset is not None:
@@ -161,6 +158,7 @@ if __name__ == "__main__":
 
     parser.add_argument('--project', '-p', type=str, help='the project name', default='stress-in-action')
     parser.add_argument('--ignore_wandb', '-iw', help='Ignore wandb', action='store_true')
+    parser.add_argument('--ignore_torch_format', '-it', help='Ignore wandb', action='store_true')
     
     parser.add_argument('--epochs', '-e', type=int, help='the amount of epochs to train', default=11) 
     parser.add_argument('--batch_size', '-b', type=int, help='the batch size to use', default=1024) # default from tuner.scale_batch_size(model)
@@ -221,6 +219,7 @@ if __name__ == "__main__":
         batch_size=args.batch_size,
         learning_rate=args.learning_rate,
         num_workers=args.n_workers,
+        ignore_torch_format=args.ignore_torch_format,
         train_participants=train_participants if not args.test else train_participants[:1],
         val_participants=val_participants if not args.test else val_participants[:1],
         test_participants=test_participants if not args.test else test_participants[:1]
