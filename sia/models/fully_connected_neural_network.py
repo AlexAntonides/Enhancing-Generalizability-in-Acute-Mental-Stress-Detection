@@ -5,11 +5,11 @@ class Model(LightningModule):
     """
         Something I found on https://github.com/Edouard99/Stress_Detection_ECG/
     """
-    def __init__(self):
+    def __init__(self, window_size: int):
         super().__init__()
         
         self.layers = nn.Sequential(
-            nn.Linear(1000,512,bias=True),
+            nn.Linear(window_size,512,bias=True),
             nn.BatchNorm1d(512),
             nn.Dropout(0.5),
             nn.LeakyReLU(0.2),

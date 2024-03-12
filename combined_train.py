@@ -8,12 +8,11 @@ from glob import glob
 
 import torch
 from torch.utils.data import DataLoader
-from lightning.pytorch.callbacks import ModelCheckpoint
 
 import lightning as L
 from lightning import LightningModule
 
-from datasets import Dataset, load_dataset
+from datasets import Dataset, load_from_disk
 
 import torchmetrics
 from sklearn.model_selection import train_test_split
@@ -30,25 +29,15 @@ def prepare_model(
     learning_rate: float, 
     num_workers: int,
     ignore_torch_format: bool,
-    train_participants: list[str],
-    val_participants: list[str],
-    test_participants: list[str],
     dataset: torch.utils.data.Dataset = None
 ) -> LightningModule:
     class Model(model):
         def __init__(self, batch_size: int, learning_rate: float, num_workers: int):
             self.save_hyperparameters()
-            super().__init__(window)
+            super().__init__()
 
         def prepare_data(self):
-            self.data = load_dataset(
-                data,
-                trust_remote_code=True,
-                train_participants=train_participants, 
-                val_participants=val_participants, 
-                test_participants=test_participants,
-                num_proc=num_workers if len(train_participants) > num_workers else len(train_participants)
-            )
+            self.data = load_from_disk(data)
 
             if ignore_torch_format == False:
                 self.data = self.data.with_format("torch")
@@ -120,7 +109,6 @@ def prepare_model(
             return y, y_hat
         
         def configure_optimizers(self) -> L.pytorch.utilities.types.OptimizerLRScheduler:
-            # return torch.optim.SGD(self.prepare_data(), lr=self.hparams.learning_rate, momentum=0.9)
             return torch.optim.Adam(self.parameters(), lr=self.hparams.learning_rate)
         
         def train_dataloader(self):
@@ -139,13 +127,8 @@ def prepare_model(
     )
 
 def train(name: str, model: LightningModule, epochs: int):
-    callbacks = [
-        ModelCheckpoint(save_top_k=1, monitor="val_acc", mode="max", save_last=True)
-    ]
-
     trainer = L.Trainer(
         max_epochs=epochs, 
-        callbacks=callbacks,
         accelerator="auto", 
         devices="auto", 
         strategy="auto", 
@@ -169,7 +152,7 @@ if __name__ == "__main__":
     )
 
     parser.add_argument('model', type=str, help='the model')
-    parser.add_argument('data', type=str, help='the data directory', nargs='+')
+    parser.add_argument('data', type=str, help='the data directory')
 
     parser.add_argument('--dataset', '-d', type=str, help='the dataset', default='sia.datasets.dataset')
 
@@ -190,41 +173,13 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    assert isinstance(args.data, list)
-    assert len(args.data) > 0
-
-    if len(args.data) == 1:
-        if Path(args.data[0]).exists():
-            # Assume path is literal path
-            participants = args.data
-        else:
-            # Assume path is a wildcard path
-            participants = glob(args.data[0])
-    elif len(args.data) > 1:
-        # Assume path is a list of paths
-        participants = args.data
-    else:
-        raise FileNotFoundError(f"No participants found on {args.data}")
-
-    participants = [Path(p).stem for p in participants]
-
-    if len(participants) == 0:
-        raise FileNotFoundError(f"No participants found on {args.data}:", participants)
-    elif len(participants) <= 3:
-        raise FileNotFoundError(f"Too few participants found on {args.data}:", participants)
-
-    train_participants, test_participants = train_test_split(participants, test_size=args.test_size)
-    train_participants, val_participants = train_test_split(train_participants, test_size=args.val_size)
-
     model_name = args.model.split('.')[-1]
     model_module = importlib.import_module(args.model)
 
     if isinstance(args.data, str):
         dataset_name = args.data.split('/')[-2]
-        dataset_path = '/'.join(args.data.split('/')[:-1])
     elif isinstance(args.data, list):
         dataset_name = args.data[0].split('/')[-2]
-        dataset_path = '/'.join(args.data[0].split('/')[:-1])
     else: 
         dataset_name = 'unknown'
     
@@ -233,16 +188,13 @@ if __name__ == "__main__":
 
     model = prepare_model(
         model=model_module.Model, # assuming all models are named Model.
-        data=dataset_path,
+        data=args.data,
         dataset=dataset_module.Dataset if args.dataset else None,
         window=args.window,
         batch_size=args.batch_size,
         learning_rate=args.learning_rate,
         num_workers=args.n_workers,
-        ignore_torch_format=args.ignore_torch_format,
-        train_participants=train_participants if not args.test else train_participants[:1],
-        val_participants=val_participants if not args.test else val_participants[:1],
-        test_participants=test_participants if not args.test else test_participants[:1]
+        ignore_torch_format=args.ignore_torch_format
     )
 
     if args.ignore_wandb == False:
