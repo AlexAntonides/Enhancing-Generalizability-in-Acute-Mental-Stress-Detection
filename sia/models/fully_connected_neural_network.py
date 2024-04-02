@@ -1,19 +1,24 @@
 from torch import nn
 from lightning import LightningModule
 
+def init_weight(m):
+    """Initialization of the weights"""
+    if isinstance(m,nn.Linear):
+        nn.init.xavier_uniform_(m.weight)
+        m.bias.data.fill_(0.01)
+    if isinstance(m, nn.BatchNorm1d):
+        m.weight.data.fill_(1)
+        m.bias.data.zero_() 
+
 class Model(LightningModule):
     """
         Something I found on https://github.com/Edouard99/Stress_Detection_ECG/
     """
-    def __init__(self, window_size: int):
+    def __init__(self, input_size: int = 12):
         super().__init__()
         
         self.layers = nn.Sequential(
-            nn.Linear(window_size,512,bias=True),
-            nn.BatchNorm1d(512),
-            nn.Dropout(0.5),
-            nn.LeakyReLU(0.2),
-            nn.Linear(512,128,bias=True),
+            nn.Linear(input_size,128,bias=True),
             nn.BatchNorm1d(128),
             nn.Dropout(0.5),
             nn.LeakyReLU(0.2),
@@ -32,6 +37,7 @@ class Model(LightningModule):
             nn.Linear(4,1,bias=True),
             nn.Sigmoid()
         )
+        self.layers.apply(init_weight)
 
     def forward(self, x):
         embedding = self.layers(x)

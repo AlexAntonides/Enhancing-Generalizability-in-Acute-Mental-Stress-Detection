@@ -213,8 +213,13 @@ if __name__ == "__main__":
     elif len(participants) <= 3:
         raise FileNotFoundError(f"Too few participants found on {args.data}:", participants)
 
-    train_participants, test_participants = train_test_split(participants, test_size=args.test_size)
-    train_participants, val_participants = train_test_split(train_participants, test_size=args.val_size)
+    if args.test_size.is_integer() and args.val_size.is_integer():
+        train_participants = participants[:-int(args.test_size)]
+        val_participants = participants[-int(args.test_size):]
+        test_participants = participants[-int(args.val_size):]
+    else: 
+        train_participants, test_participants = train_test_split(participants, test_size=args.test_size)
+        train_participants, val_participants = train_test_split(train_participants, test_size=args.val_size)
 
     model_name = args.model.split('.')[-1]
     model_module = importlib.import_module(args.model)
