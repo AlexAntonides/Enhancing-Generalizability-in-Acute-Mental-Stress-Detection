@@ -3,6 +3,7 @@ data/
 figures/
 lightning_logs/
 wandb/
+ignore/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
