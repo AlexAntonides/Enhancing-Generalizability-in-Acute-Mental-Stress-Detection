@@ -25,7 +25,6 @@ torch.set_float32_matmul_precision('medium')
 def prepare_model(
     model: LightningModule, 
     data: str,
-    window: int,
     batch_size: int, 
     learning_rate: float, 
     num_workers: int,
@@ -33,12 +32,13 @@ def prepare_model(
     train_participants: list[str],
     val_participants: list[str],
     test_participants: list[str],
-    dataset: torch.utils.data.Dataset = None
+    dataset: torch.utils.data.Dataset = None,
+    dataset_kwargs: dict = None
 ) -> LightningModule:
     class Model(model):
         def __init__(self, batch_size: int, learning_rate: float, num_workers: int):
             self.save_hyperparameters()
-            super().__init__(window)
+            super().__init__()
 
         def prepare_data(self):
             self.data = load_dataset(
@@ -47,7 +47,7 @@ def prepare_model(
                 train_participants=train_participants, 
                 val_participants=val_participants, 
                 test_participants=test_participants,
-                num_proc=num_workers if len(train_participants) > num_workers else len(train_participants)
+                num_proc=self.hparams.num_workers if len(train_participants) > self.hparams.num_workers else len(train_participants)
             )
 
             if ignore_torch_format == False:
@@ -55,62 +55,67 @@ def prepare_model(
 
         def setup(self, stage):
             if dataset is not None:
-                self.dataset = dataset(self.data[stage], window)
+                self.dataset = dataset(self.data[stage], **dataset_kwargs)
             else:
                 self.dataset = self.data[stage]
 
             self.train_accuracy = torchmetrics.classification.BinaryAccuracy()
             self.train_f1score = torchmetrics.classification.BinaryF1Score()
             self.train_precision = torchmetrics.classification.BinaryPrecision()
+            self.train_loss = torch.nn.CrossEntropyLoss()
 
             self.validation_accuracy = torchmetrics.classification.BinaryAccuracy()
             self.validation_f1score = torchmetrics.classification.BinaryF1Score()
             self.validation_precision = torchmetrics.classification.BinaryPrecision()
+            self.validation_loss = torch.nn.CrossEntropyLoss()
 
             self.test_accuracy = torchmetrics.classification.BinaryAccuracy()
             self.test_f1score = torchmetrics.classification.BinaryF1Score()
             self.test_precision = torchmetrics.classification.BinaryPrecision()
-
-        def forward(self, x):
-            embedding = self.layers(x)
-            return embedding.squeeze()
+            self.test_loss = torch.nn.CrossEntropyLoss()
         
         def training_step(self, batch, batch_idx):
             y, y_hat = self._step(batch, batch_idx)
             
-            step_loss = torch.nn.functional.binary_cross_entropy(y_hat, y)
-            self.train_accuracy.update(y_hat.squeeze(), y)
-            self.train_f1score.update(y_hat.squeeze(), y)
-            self.train_precision.update(y_hat.squeeze(), y)
+            # step_loss = torch.nn.functional.binary_cross_entropy(y_hat, y)
+            step_loss = self.train_loss(y_hat, y)
+            self.train_accuracy.update(torch.argmax(y_hat, 1), y)
+            self.train_f1score.update(torch.argmax(y_hat, 1), y)
+            self.train_precision.update(torch.argmax(y_hat, 1), y)
 
             if wandb.run is not None:
                 wandb.log({"accuracy": self.train_accuracy.compute(), "precision": self.train_precision.compute(), "loss": step_loss, "f1": self.train_f1score.compute()})
-            
+            # self.log_dict({"accuracy": self.train_accuracy.compute(), "precision": self.train_precision.compute(), "loss": step_loss, "f1": self.train_f1score.compute()})
+# 
             return step_loss
 
         def validation_step(self, batch, batch_idx):
             y, y_hat = self._step(batch, batch_idx)
 
-            step_loss = torch.nn.functional.binary_cross_entropy(y_hat, y)
-            self.validation_accuracy.update(y_hat.squeeze(), y)
-            self.validation_f1score.update(y_hat.squeeze(), y)
-            self.validation_precision.update(y_hat.squeeze(), y)
+            # step_loss = torch.nn.functional.binary_cross_entropy(y_hat, y)
+            step_loss = self.validation_loss(y_hat, y)
+            self.validation_accuracy.update(torch.argmax(y_hat, 1), y)
+            self.validation_f1score.update(torch.argmax(y_hat, 1), y)
+            self.validation_precision.update(torch.argmax(y_hat, 1), y)
 
             if wandb.run is not None:
                 wandb.log({"val_accuracy": self.validation_accuracy.compute(), "val_precision": self.validation_precision.compute(), "val_loss": step_loss, "val_f1": self.validation_f1score.compute()})
+            self.log_dict({"val_accuracy": self.validation_accuracy.compute(), "val_precision": self.validation_precision.compute(), "val_loss": step_loss, "val_f1": self.validation_f1score.compute()})
             
             return step_loss
         
         def test_step(self, batch, batch_idx):
             y, y_hat = self._step(batch, batch_idx)
 
-            step_loss = torch.nn.functional.binary_cross_entropy(y_hat, y)
-            self.test_accuracy.update(y_hat.squeeze(), y)
-            self.test_f1score.update(y_hat.squeeze(), y)
-            self.test_precision.update(y_hat.squeeze(), y)
+            # step_loss = torch.nn.functional.binary_cross_entropy(y_hat, y)
+            step_loss = self.test_loss(y_hat, y)
+            self.test_accuracy.update(torch.argmax(y_hat, 1), y)
+            self.test_f1score.update(torch.argmax(y_hat, 1), y)
+            self.test_precision.update(torch.argmax(y_hat, 1), y)
 
             if wandb.run is not None:
                 wandb.log({"test_accuracy": self.test_accuracy.compute(), "test_precision": self.test_precision.compute(), "test_loss": step_loss, "test_f1": self.test_f1score.compute()})
+            # self.log_dict({"test_accuracy": self.test_accuracy.compute(), "test_precision": self.test_precision.compute(), "test_loss": step_loss, "test_f1": self.test_f1score.compute()})
             
             return step_loss
 
@@ -139,18 +144,18 @@ def prepare_model(
     )
 
 def train(name: str, model: LightningModule, epochs: int):
-    callbacks = [
-        ModelCheckpoint(save_top_k=1, monitor="val_acc", mode="max", save_last=True)
-    ]
+    # callbacks = [
+    #     ModelCheckpoint(save_top_k=1, monitor="val_accuracy", mode="max", save_last=True)
+    # ]
 
     trainer = L.Trainer(
         max_epochs=epochs, 
-        callbacks=callbacks,
+        # callbacks=callbacks,
         accelerator="auto", 
         devices="auto", 
         strategy="auto", 
         profiler="simple",
-        default_root_dir=f"./checkpoints/{model_name}"
+        default_root_dir=f"./checkpoints/{name}"
     )
 
     tuner = L.pytorch.tuner.Tuner(
@@ -160,6 +165,8 @@ def train(name: str, model: LightningModule, epochs: int):
     trainer.fit(
         model=model
     )
+
+    return trainer
 
 if __name__ == "__main__":
     parser = ArgumentParser(
@@ -240,14 +247,14 @@ if __name__ == "__main__":
         model=model_module.Model, # assuming all models are named Model.
         data=dataset_path,
         dataset=dataset_module.Dataset if args.dataset else None,
-        window=args.window,
         batch_size=args.batch_size,
         learning_rate=args.learning_rate,
         num_workers=args.n_workers,
         ignore_torch_format=args.ignore_torch_format,
         train_participants=train_participants if not args.test else train_participants[:1],
         val_participants=val_participants if not args.test else val_participants[:1],
-        test_participants=test_participants if not args.test else test_participants[:1]
+        test_participants=test_participants if not args.test else test_participants[:1],
+        dataset_kwargs={ 'window': args.window }
     )
 
     if args.ignore_wandb == False:
