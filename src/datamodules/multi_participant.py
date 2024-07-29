@@ -6,6 +6,10 @@ from datasets import load_dataset
 from typing import Union
 
 class MultiParticipantDataModule(L.LightningDataModule):
+    """
+    Allows the datamodule to load a dataset with separate participants for training, validation, and testing,
+    to avoid data leakage between the splits.
+    """
     def __init__(
         self, 
         path: str,
@@ -31,6 +35,7 @@ class MultiParticipantDataModule(L.LightningDataModule):
         self.standardize = standardize
 
     def prepare_data(self):
+        """Uses HuggingFace Datasets to load the dataset via PyArrow to prevent memory issues."""
         self.data = load_dataset(
             self.path,
             trust_remote_code=True,
@@ -47,11 +52,13 @@ class MultiParticipantDataModule(L.LightningDataModule):
             self.train_std = self.data['fit']['signal'].std()
 
     def setup(self, stage):
+        """Allows custom dataset instantiation for each stage.""" 
         if self.dataset is not None:
             kwargs = {}
             if self.standardize:
-                kwargs['train_mean'] = self.train_mean
-                kwargs['train_std'] = self.train_std
+                if stage != 'test': 
+                    kwargs['train_mean'] = self.train_mean
+                    kwargs['train_std'] = self.train_std
             self.dataset = self.dataset(self.data[stage], **kwargs)
         else:
             self.dataset = self.data[stage]

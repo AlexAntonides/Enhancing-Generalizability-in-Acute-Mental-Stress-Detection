@@ -21,7 +21,7 @@ class RnnModule(LightningModule):
             raise ValueError("rnn_type must be 'lstm' or 'gru'")
         
         self.layers = nn.Sequential(
-            # nn.BatchNorm1d(hidden_size),
+            nn.BatchNorm1d(hidden_size),
             nn.Dropout(0.5),
             nn.Linear(hidden_size, 1),
             # nn.Sigmoid()
@@ -39,4 +39,5 @@ class RnnModule(LightningModule):
         # Get the last hidden state
         hidden = hidden[-1]  # (batch_size, hidden_size)
         
+        # Logits
         return self.layers(hidden)

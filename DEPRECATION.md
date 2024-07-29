@@ -16,7 +16,7 @@
   <p align="center">
     This repository houses the codebase to predict stress solely on the electrical activity of the heart.
     <br />
-    <a href="https://github.com/AlexAntonides/stress-in-action/tree/master/sia/docs/structure.md"><strong>Explore the docs »</strong></a>
+    <a href="https://github.com/AlexAntonides/stress-in-action/blob/main/README.md"><strong>Explore the docs »</strong></a>
     <br />
     <br />
     <a href="https://github.com/AlexAntonides/stress-in-action/issues">Report Bug</a>
