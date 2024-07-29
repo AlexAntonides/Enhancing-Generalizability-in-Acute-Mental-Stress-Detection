@@ -3,7 +3,7 @@
 !.gitkeep
 
 checkpoints/
-# data/
+data/
 figures/
 lightning_logs/
 wandb/
