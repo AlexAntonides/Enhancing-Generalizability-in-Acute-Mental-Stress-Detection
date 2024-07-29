@@ -45,53 +45,24 @@
   </ol>
 </details>
 
-<!-- ABOUT THE PROJECT -->
-## About The Project
-This project aims to predict the stress of an unknown person soley on the electrical activity of the heart. This is achieved through training a neural network on electrocardiogram (ECG) recordings.
+<!-- DEPRECATION -->
+## Deprecation Notice
+This repository is currently being refactored, to make the code more readable and less of a mess in general. This markdown file keeps track of the important code that is used in the experiments.
 
-### Stress-in-Action (SiA)-Kit
-The SiA-Kit is a package that provides human-readable and extendable pipelines to repeat the experiments described in the project. The builder pattern that is used throughout the pipelines, makes it easier to understand what is happening behind the scenes. 
+### 1. Feature Extraction
+The features were extracted using the notebook in `deprecated/2_experiments_apr-jun/t.ipynb`.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+### 2. Training of Machine Learning Models.
+The models were trained in the notebook found in `deprecated/4_experiments_jul-aug/optuna_3.0.ipynb`.
 
-<!-- GETTING STARTED -->
-## Getting Started
+### 3. Training of Neural Network.
+The Command Line Interface (CLI) used to initiate the process can be found in `deprecated/4_experiments_jul-aug/train.py`.\
+The CLI requires a dataset and model to run, which can be found in `deprecated/4_experiments_jul-aug/datasets/stepping_dataset.py` and `deprecated/4_experiments_jul-aug/models/time_series.py` respectively.\
+The **[updated]** command used is, `py ./deprecated/4_experiments_jul-aug/train.py ./deprecated/4_experiments_jul-aug/models/time_series.py ./data/signal/mental_stress/*.csv --dataset=deprecated.4_experiments_jul-aug.datasets.stepping_dataset --batch_size=64 --window=10000 --epochs=200 --standardize`,\
+or the more readable version, `py train.py <model> <data_files> --dataset=<dataset> --batch_size=<batch_size> --window=<window> --epochs=<epochs> --standardize`.  
 
-### Prerequisites
-
-* Python v3.9+
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-### Preparation
-1. **Install The Packages**. \
-Open the terminal in the root directory and execute the following command, 
-```bash
-pip[3] install -r requirements.txt
-```
-
-### Preprocessing
-_A step by step series of examples that tell you how to get the data cleaned._
-
-1.  **Prepare your dataset**.\
-The directories that were used throughout the experiment can be found in `data/`, which is separated into four parts, `raw` for the raw data, `cleaned` for the cleaned data, `features` for the manually extracted features used to build the machine learning models, and `signal` which can be used by a neural network.\
-The use of these directories are **optional**, any directories can be used, as long as the paths are changed accordingly.\
-The dataset can be prepared by using the pipeline found in `0_preprocessing.ipynb`, or by using the methods that can be found in the SiA-kit, like so,
-
-```py
-sia.Preprocessing() \
-    .data(read_csv('<in_path>/*.csv')) \
-    .process(neurokit()) \
-    .to(write_csv('<out_path>/[0-9]{5}.csv'))
-```
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-<!-- FREQUENTLY ASKED QUESTIONS -->
-## Frequently Asked Questions
-
-1. **Where is everything?**\
-The repository is currently going through an overhaul. The old code can be found in `/deprecated`.
+### 4. Experiments
+The experiments are scattered throughout the folders found in `deprecated/`, these include experiments to calculate certain features and to generate images for presentations.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

@@ -1,11 +1,11 @@
-"""Top-level package for Stress-in-Action."""
+"""Top-level package for Stress-in-Action (SiA)."""
 
 # Dependencies
 import numpy as np
-import pandas as pd
+import datasets
 
 # Info
-__version__ = "0.0.2"
+__version__ = "1.0.0"
 
 # Maintainer info
 __author__ = "Alex Antonides"
