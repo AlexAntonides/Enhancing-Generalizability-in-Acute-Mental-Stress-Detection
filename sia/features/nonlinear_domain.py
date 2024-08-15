@@ -46,9 +46,9 @@ def nonlinear_domain(features: tuple[Feature], sampling_rate: int = 1000):
                 hrv_nonlinear = hrv_nonlinear.iloc[0].to_dict()
 
                 result.update({
-                    f'ApEn': hrv_nonlinear.get("HRV_ApEn", 0),
-                    f'SampEn': hrv_nonlinear.get("HRV_SampEn", 0),
-                    f'FuzzyEn': hrv_nonlinear.get("HRV_FuzzyEn", 0),
+                    f'apen': hrv_nonlinear.get("HRV_ApEn", 0),
+                    f'sampen': hrv_nonlinear.get("HRV_SampEn", 0),
+                    f'fuzzyen': hrv_nonlinear.get("HRV_FuzzyEn", 0),
                 })
             elif feature == Feature.POINCARE:
                 hrv_nonlinear = nk.hrv_nonlinear(rpeaks, sampling_rate=sampling_rate)
@@ -56,8 +56,9 @@ def nonlinear_domain(features: tuple[Feature], sampling_rate: int = 1000):
                 hrv_nonlinear = hrv_nonlinear.iloc[0].to_dict()
 
                 result.update({
-                    f'SD1': hrv_nonlinear.get("HRV_SD1", 0),
-                    f'SD2': hrv_nonlinear.get("HRV_SD2", 0),
+                    f'sd1': hrv_nonlinear.get("HRV_SD1", 0),
+                    f'sd2': hrv_nonlinear.get("HRV_SD2", 0),
+                    f'sd1_sd2': hrv_nonlinear.get("HRV_SD1/SD2", 0),
                 })
             elif feature == Feature.FRAGMENTATION:
                 hrv_nonlinear = nk.hrv_nonlinear(rpeaks, sampling_rate=sampling_rate)
@@ -65,7 +66,7 @@ def nonlinear_domain(features: tuple[Feature], sampling_rate: int = 1000):
                 hrv_nonlinear = hrv_nonlinear.iloc[0].to_dict()
 
                 result.update({
-                    f'PSS': hrv_nonlinear.get("HRV_PSS", 0),
+                    f'pss': hrv_nonlinear.get("HRV_PSS", 0),
                 })
             elif feature == Feature.RQA:
                 rqa = nk.hrv_rqa(rpeaks, sampling_rate=sampling_rate)

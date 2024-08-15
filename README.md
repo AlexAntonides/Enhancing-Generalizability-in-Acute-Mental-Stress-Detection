@@ -47,7 +47,7 @@
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
-This project aims to predict the stress of an unknown person soley on the electrical activity of the heart. This is achieved through training a neural network on electrocardiogram (ECG) recordings.
+This project aims to predict the stress of an unknown person soley on the electrical activity of the heart. This is achieved through training machine learning models on electrocardiogram (ECG) recordings.
 
 ### Stress-in-Action (SiA)-Kit
 The SiA-Kit is a package that provides human-readable and extendable pipelines to repeat the experiments described in the project. The builder pattern that is used throughout the pipelines, makes it easier to understand what is happening behind the scenes. 
@@ -76,7 +76,7 @@ _A step by step series of examples that tell you how to get the data cleaned._
 1.  **Prepare your dataset**.\
 The directories that were used throughout the experiment can be found in `data/`, which is separated into four parts, `raw` for the raw data, `cleaned` for the cleaned data, `features` for the manually extracted features used to build the machine learning models, and `signal` which can be used by a neural network.\
 The use of these directories are **optional**, any directories can be used, as long as the paths are changed accordingly.\
-The dataset can be prepared by using the pipeline found in `0_preprocessing.ipynb`, or by using the methods that can be found in the SiA-kit, like so,
+The dataset can be prepared by using the pipeline found in `1_preprocessing.ipynb`, or by using the methods that can be found in the SiA-kit, like so,
 
 ```py
 sia.Preprocessing() \
@@ -84,14 +84,29 @@ sia.Preprocessing() \
     .process(neurokit()) \
     .to(write_csv('<out_path>/[0-9]{5}.csv'))
 ```
+
+2. **Extract the features**.\
+The features can be extracted by using the pipeline found in `2_feature_extraction.ipynb`, or by using the methods that can be found in the SiA-kit, like so,
+
+```py
+sia.Segmenter() \
+    .data(read_csv('<in_path>/*.csv')) \
+    .segment(SlidingWindow(WINDOW_SIZE, int(STEP_SIZE))) \
+        .extract(hrv([Statistic.MEAN, Statistic.CVSD, Statistic.NN20]))
+    .to(write_csv('<out_path>/[0-9]{5}.csv'))
+```
+
+3. **Build the model**.\
+The model can be built by using the pipeline found in `3_training.ipynb`.
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 <!-- FREQUENTLY ASKED QUESTIONS -->
 ## Frequently Asked Questions
 
-1. **Where is everything?**\
-The repository is currently going through an overhaul. The old code can be found in `/deprecated`.
+1. **Where are the experiments?**\
+For better readability, this repository has been overhauled. The notebooks with the experiments can be found in `/deprecated`.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

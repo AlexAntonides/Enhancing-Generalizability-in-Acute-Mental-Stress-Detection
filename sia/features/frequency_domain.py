@@ -84,6 +84,7 @@ def frequency_domain(
                 f'hf_{feature}': df['HRV_HF'].item(),
                 f'vhf_{feature}': df['HRV_VHF'].item(),
                 f'uhf_{feature}': df['HRV_UHF'].item(),
+                f'tp_{feature}': df['HRV_TP'].item(),
                 f'lp_ulf_{feature}': (df['HRV_ULF'].item() / df['HRV_TP'].item()) * 100,
                 f'lp_vlf_{feature}': (df['HRV_VLF'].item() / df['HRV_TP'].item()) * 100,
                 f'lp_lf_{feature}': (df['HRV_LF'].item() / df['HRV_TP'].item()) * 100,
