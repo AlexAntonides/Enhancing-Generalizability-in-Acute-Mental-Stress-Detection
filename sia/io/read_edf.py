@@ -7,13 +7,28 @@ import mne
 
 from datasets import Dataset, IterableDataset
 
-from typing import Union, Callable, Iterator
+from typing import Union, Callable, Iterator, Tuple
 
 from .metadata import Metadata
 
-def read_edf(path: str, metadata: Union[pd.DataFrame, Metadata, Callable[[mne.io.Raw], pd.DataFrame]] = None) -> Callable[[Union[pd.DataFrame, Metadata, Callable[[mne.io.Raw], pd.DataFrame]]], Iterator[Union[Dataset, IterableDataset]]]:
-    """Read an EDF file."""
-    def inner() -> Iterator[Union[Dataset, IterableDataset]]:
+def read_edf(path: str, metadata: Union[pd.DataFrame, Metadata, Callable[[mne.io.Raw], pd.DataFrame]] = None, sampling_rate: int = 1000) -> Callable[[], Tuple[str, Union[Dataset, IterableDataset]]]:
+    """Read an EDF file.
+    
+    Parameters
+    ----------
+    path : str
+        The path to the EDF file.
+    metadata : Union[pd.DataFrame, Metadata, Callable[[mne.io.Raw], pd.DataFrame]], optional
+        The metadata for the EDF file, by default, None.
+    sampling_rate : int, optional
+        The sampling rate of the EDF file, by default, 1000.
+
+    Returns
+    -------
+    Callable[[], Tuple[str, Union[Dataset, IterableDataset]]]
+        A function that reads the EDF file.
+    """
+    def inner() -> Iterator[Tuple[str, Union[Dataset, IterableDataset]]]:
         files = glob(path)
         if len(files) == 0:
             raise FileNotFoundError(f'No files found at {path}')
@@ -25,7 +40,7 @@ def read_edf(path: str, metadata: Union[pd.DataFrame, Metadata, Callable[[mne.io
                     yield from read_edf(file, metadata)()
         else:
             raw = mne.io.read_raw_edf(files[0], preload=True, verbose=40) # 40 = Logging.ERROR
-            timestamps = raw.times * 1000 # The code will interpret this value as milliseconds, thus 1 millisecond, instead of 0.001 millisecond. 
+            timestamps = raw.times * sampling_rate # The code will interpret this value as milliseconds, thus 1 millisecond, instead of 0.001 millisecond. 
             signals = raw.get_data()[0]
 
             timestamps = timestamps.astype('timedelta64[ms]') + np.datetime64(raw.annotations.orig_time.replace(tzinfo=None), 'ms')
@@ -43,7 +58,20 @@ def read_edf(path: str, metadata: Union[pd.DataFrame, Metadata, Callable[[mne.io
     return inner
 
 def attach_edf_metadata(df: pd.DataFrame, metadata: Metadata) -> pd.DataFrame: 
-    """Attach metadata to an EDF file."""
+    """Attach metadata to an EDF file.
+    
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The EDF file.
+    metadata : Metadata
+        The metadata for the EDF file.
+    
+    Returns
+    -------
+    pd.DataFrame
+        The EDF file with the metadata attached
+    """
     if not 'datetime64[ms]' in str(metadata.start.dtype) or not 'datetime64[ms]' in str(metadata.end.dtype):
         with pd.option_context('mode.chained_assignment', None):
             metadata.start = metadata.start.astype('datetime64[ms]')

@@ -5,5 +5,6 @@ from .pipeline import *
 
 # Submodules
 from .preprocessing import *
+from .extractor import *
 from .train import *
 from .figures import *

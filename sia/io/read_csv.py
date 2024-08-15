@@ -1,3 +1,4 @@
+import warnings
 from glob import glob 
 
 import datasets
@@ -6,8 +7,22 @@ from datasets import load_dataset, Dataset, IterableDataset
 from typing import Union, Tuple, Callable, Iterator
 
 def read_csv(path: str, columns: Union[None, Tuple[str]] = None) -> Callable[[Union[None, Tuple[str]]], Iterator[Union[Dataset, IterableDataset]]]:
-    """Read a CSV file."""
+    """Read a CSV file.
+    
+    Parameters
+    ----------
+    path : str
+        The path to the CSV file.
+    columns : Union[None, Tuple[str]], optional
+        The columns to read, by default, None.
+
+    Returns
+    -------
+    Callable[[Union[None, Tuple[str]]], Iterator[Union[Dataset, IterableDataset]]]
+        A function that reads the CSV file.
+    """
     def inner() -> Iterator[Union[Dataset, IterableDataset]]:
+        warnings.filterwarnings("ignore")
         files = glob(path)
         if len(files) == 0:
             raise FileNotFoundError(f'No files found at {path}')
@@ -17,12 +32,9 @@ def read_csv(path: str, columns: Union[None, Tuple[str]] = None) -> Callable[[Un
         else:
             ds = load_dataset(
                 "csv", 
-                data_files=path,
-                usecols=columns, 
-                features=datasets.Features({
-                    columns[0]: datasets.Value('float64'), 
-                    columns[1]: datasets.Value('string')
-                }) if columns is not None else None
+                data_files=files[0],
+                usecols=columns
             )
-            yield path, ds['train']
+            yield files[0], ds['train']
+        warnings.filterwarnings("default")
     return inner

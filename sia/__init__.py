@@ -1,5 +1,8 @@
 """Top-level package for Stress-in-Action (SiA)."""
 
+import warnings
+warnings.filterwarnings("ignore")
+
 # Dependencies
 import numpy as np
 import datasets
@@ -12,3 +15,5 @@ __author__ = "Alex Antonides"
 
 # Subpackages
 from .builders import *
+
+warnings.filterwarnings("default")
