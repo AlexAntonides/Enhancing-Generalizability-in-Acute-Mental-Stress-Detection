@@ -34,7 +34,8 @@
       <a href="#getting-started">Getting Started</a>
       <ul>
         <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#installation">Installation</a></li>
+        <li><a href="#preparation">Preparation</a></li>
+        <li><a href="#preprocessing">Preprocessing</a></li>
       </ul>
     </li>
     <li>
@@ -89,7 +90,7 @@ The features can be extracted by using the pipeline found in `2_feature_extracti
 ```py
 sia.Segmenter() \
     .data(read_csv('<in_path>/*.csv')) \
-    .segment(SlidingWindow(WINDOW_SIZE, int(STEP_SIZE))) \
+    .segment(SlidingWindow(WINDOW_SIZE, STEP_SIZE)) \
         .extract(hrv([Statistic.MEAN, Statistic.CVSD, Statistic.NN20]))
     .to(write_csv('<out_path>/[0-9]{5}.csv'))
 ```
@@ -98,7 +99,6 @@ sia.Segmenter() \
 The model can be built by using the pipeline found in `3_training.ipynb`.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 <!-- FREQUENTLY ASKED QUESTIONS -->
 ## Frequently Asked Questions
