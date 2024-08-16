@@ -73,9 +73,9 @@ def nonlinear_domain(features: tuple[Feature], sampling_rate: int = 1000):
                 rqa = rqa.fillna(0)
 
                 result.update({
-                    f"w": rqa['W'],
-                    f"wmax": rqa['WMax'],
-                    f"wen": rqa['WEn']
+                    f"w": rqa.get('W', 0),
+                    f"wmax": rqa.get('WMax', 0),
+                    f"wen": rqa.get('WEn', 0)
                 })
             else:
                 raise ValueError(f"Feature {feature} is not valid.")

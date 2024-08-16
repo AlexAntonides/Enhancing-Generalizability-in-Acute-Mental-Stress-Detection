@@ -32,7 +32,7 @@ def morphology_domain(features: tuple[Feature]):
         for feature in features:
             if feature == Feature.TWA:
                 twa = calculate_twa(ECG_Clean, tpeaks)
-                result.update({ "twa": twa })
+                result.update({ "twa": twa.item() })
             else:
                 raise ValueError(f"Feature {feature} is not valid.")
         warnings.filterwarnings("default")
@@ -54,6 +54,8 @@ def calculate_twa(signal: list[float], tpeaks: list[int]):
     dict
         A dictionary containing the TWA feature.
     """
+    signal = np.array(signal)   
+
     # Divide the T-peaks into two buckets, even and odd.
     even_bucket = tpeaks[1::2]
     odd_bucket = tpeaks[::2]
@@ -63,8 +65,8 @@ def calculate_twa(signal: list[float], tpeaks: list[int]):
     average_t_odd = np.mean(np.take(signal, odd_bucket))
 
     if average_t_even is None or average_t_odd is None:
-        return np.nan.item()
+        return np.nan
     else:
         # Calculate the difference in amplitude between the even and odd buckets.
         twa = abs(average_t_even - average_t_odd)
-        return twa.item()
+        return twa

@@ -49,10 +49,10 @@ def hr(statistics: Union[dict, list[Statistic]], sampling_rate: int = 1000):
         result = {}
         if isinstance(statistics, dict):
             for key, value in statistics.items():
-                result[f'hr_{key}'] = value(hr)
+                result[f'hr_{key}'] = value(hr).item()
         elif isinstance(statistics, list):
             for statistic in statistics:
-                result[f'hr_{statistic.name.lower()}'] = statistic.value[0](hr)
+                result[f'hr_{statistic.name.lower()}'] = statistic.value[0](hr).item()
         return result
     return inner
 
@@ -77,10 +77,10 @@ def hrv(statistics: Union[dict, list[Statistic]], sampling_rate: int = 1000):
         result = {}
         if isinstance(statistics, dict):
             for key, value in statistics.items():
-                result[f'hrv_{key}'] = value(hrv)
+                result[f'hrv_{key}'] = value(hrv).item()
         elif isinstance(statistics, list):
             for statistic in statistics:
-                result[f'hrv_{statistic.name.lower()}'] = statistic.value[0](hrv)
+                result[f'hrv_{statistic.name.lower()}'] = statistic.value[0](hrv).item()
         return result
     return inner
 
@@ -144,6 +144,6 @@ def time_domain(features: list[Feature], sampling_rate: int = 1000):
                 value = np.sqrt(np.mean(np.diff(rri) ** 2)) / np.mean(rri)
 
             if value != None:            
-                result[key] = value
+                result[key] = value.item()
         return result
     return inner
