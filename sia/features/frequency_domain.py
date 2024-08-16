@@ -9,11 +9,7 @@ from neurokit2.signal.signal_power import _signal_power_continuous
 from neurokit2.hrv.hrv_frequency import _hrv_format_input
 from neurokit2.hrv.intervals_process import intervals_process
 
-try:
-    import cupy as cp
-    np = cp
-except ImportError:
-    import numpy as np
+import numpy as np
     
 from enum import Enum
 
