@@ -39,8 +39,8 @@ class BinaryRandomAccuracy(torchmetrics.Metric):
 def prepare(
     model: L.LightningModule,
 ) -> L.LightningModule:
-    class Module(model):
-        def __init__(self, batch_size: int, learning_rate: float, num_workers: int):
+    class Module(model, L.LightningModule):
+        def __init__(self):
             self.save_hyperparameters()
             super().__init__()
 
@@ -130,4 +130,4 @@ def prepare(
                 self.log(f"{prefix}_0", stats.tn.int() + stats.fp.int(), on_step=True)
                 self.log_dict(collection, on_step=True, prog_bar=True)
 
-    return Module
+    return Module()

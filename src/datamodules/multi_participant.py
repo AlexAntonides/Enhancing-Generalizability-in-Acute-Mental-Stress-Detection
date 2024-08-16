@@ -14,7 +14,7 @@ class MultiParticipantDataModule(L.LightningDataModule):
         self, 
         path: str,
         train_participants: list,
-        validation_participants: list,
+        val_participants: list,
         test_participants: list,
         batch_size: int,
         dataset: Dataset = None,
@@ -26,7 +26,7 @@ class MultiParticipantDataModule(L.LightningDataModule):
         self.dataset = dataset
         
         self.train_participants = train_participants
-        self.validation_participants = validation_participants
+        self.val_participants = val_participants
         self.test_participants = test_participants
         
         self.batch_size = batch_size

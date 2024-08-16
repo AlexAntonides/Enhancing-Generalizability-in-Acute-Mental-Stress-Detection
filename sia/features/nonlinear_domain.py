@@ -71,11 +71,11 @@ def nonlinear_domain(features: tuple[Feature], sampling_rate: int = 1000):
             elif feature == Feature.RQA:
                 rqa = nk.hrv_rqa(rpeaks, sampling_rate=sampling_rate)
                 rqa = rqa.fillna(0)
-
+                
                 result.update({
-                    f"w": rqa.get('W', 0),
-                    f"wmax": rqa.get('WMax', 0),
-                    f"wen": rqa.get('WEn', 0)
+                    f"w": rqa['W'].item(),
+                    f"wmax": rqa['WMax'].item(),
+                    f"wen": rqa['WEn'].item()
                 })
             else:
                 raise ValueError(f"Feature {feature} is not valid.")
