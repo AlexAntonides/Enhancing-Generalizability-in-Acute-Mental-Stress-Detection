@@ -39,6 +39,8 @@ def read_edf(path: str, metadata: Union[pd.DataFrame, Metadata, Callable[[mne.io
                 for file in files:
                     yield from read_edf(file, metadata)()
         else:
+            _path = files[0]
+
             raw = mne.io.read_raw_edf(files[0], preload=True, verbose=40) # 40 = Logging.ERROR
             timestamps = raw.times * sampling_rate # The code will interpret this value as milliseconds, thus 1 millisecond, instead of 0.001 millisecond. 
             signals = raw.get_data()[0]
@@ -50,11 +52,11 @@ def read_edf(path: str, metadata: Union[pd.DataFrame, Metadata, Callable[[mne.io
             if isinstance(metadata, pd.DataFrame):
                 df = attach_edf_metadata(df, metadata)
             elif isinstance(metadata, Metadata):
-                df = attach_edf_metadata(df, metadata.retrieve(path))
+                df = attach_edf_metadata(df, metadata.retrieve(_path))
             elif callable(metadata):
                 df = attach_edf_metadata(df, metadata(raw))
 
-            yield path, Dataset.from_pandas(df)
+            yield _path, Dataset.from_pandas(df)
     return inner
 
 def attach_edf_metadata(df: pd.DataFrame, metadata: Metadata) -> pd.DataFrame: 
