@@ -30,11 +30,12 @@ def read_csv(path: str, columns: Union[None, Tuple[str]] = None) -> Callable[[Un
             for file in files:
                 yield from read_csv(file, columns)()
         else:
+            _path = files[0]
             ds = load_dataset(
                 "csv", 
-                data_files=files[0],
+                data_files=_path,
                 usecols=columns
             )
-            yield files[0], ds['train']
+            yield _path, ds['train']
         warnings.filterwarnings("default")
     return inner
